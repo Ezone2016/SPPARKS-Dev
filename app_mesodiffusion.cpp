@@ -24,7 +24,7 @@
 using namespace SPPARKS_NS;
 
 enum{ZERO,VACANT,OCCUPIED,TOP};
-//enum{NO_ENERGY,LINEAR,NONLINEAR};
+enum{NO_ENERGY,LINEAR,NONLINEAR};
 enum{DEPOSITION,NNHOP,SCHWOEBEL};
 enum{NOSWEEP,RANDOM,RASTER,COLOR,COLOR_STRICT};  // from app_lattice.cpp
 
@@ -32,7 +32,7 @@ enum{NOSWEEP,RANDOM,RASTER,COLOR,COLOR_STRICT};  // from app_lattice.cpp
 
 /* ---------------------------------------------------------------------- */
 
-AppDiffusion::AppMesoDiffusion(SPPARKS *spk, int narg, char **arg) : 
+AppMesoDiffusion::AppMesoDiffusion(SPPARKS *spk, int narg, char **arg) : 
   AppLattice(spk,narg,arg)
 {
   // these can be changed by model choice, see below
@@ -48,7 +48,7 @@ AppDiffusion::AppMesoDiffusion(SPPARKS *spk, int narg, char **arg) :
 
   // parse arguments
 
-  if (narg < 6) error->all(FLERR,"Illegal app_style mesodiffusion command");
+  // if (narg < 6) error->all(FLERR,"Illegal app_style mesodiffusion command");
 
 // By CWP, Apr. 24, 2017  
 // app_style mesodiffusion D a \gamma Nmax Nmin
@@ -103,7 +103,7 @@ AppDiffusion::AppMesoDiffusion(SPPARKS *spk, int narg, char **arg) :
 
 /* ---------------------------------------------------------------------- */
 
-AppDiffusion::~AppDiffusion()
+AppMesoDiffusion::~AppMesoDiffusion()
 {
   delete [] esites;
   delete [] psites;
@@ -125,7 +125,7 @@ AppDiffusion::~AppDiffusion()
    input script commands unique to this app
 ------------------------------------------------------------------------- */
 
-void AppDiffusion::input_app(char *command, int narg, char **arg)
+void AppMesoDiffusion::input_app(char *command, int narg, char **arg)
 {
   if (sites_exist == 0) {
     char str[128];
@@ -231,7 +231,7 @@ void AppDiffusion::input_app(char *command, int narg, char **arg)
    set site value ptrs each time iarray/darray are reallocated
 ------------------------------------------------------------------------- */
 
-void AppDiffusion::grow_app()
+void AppMesoDiffusion::grow_app()
 {
   lattice = iarray[0];
 }
@@ -241,7 +241,7 @@ void AppDiffusion::grow_app()
    check validity of site values
 ------------------------------------------------------------------------- */
 
-void AppDiffusion::init_app()
+void AppMesoDiffusion::init_app()
 {
   if (depflag && nprocs > 1)
     error->all(FLERR,"Cannot perform deposition in parallel");
@@ -268,7 +268,7 @@ void AppDiffusion::init_app()
    setup before each run
 ------------------------------------------------------------------------- */
 
-void AppDiffusion::setup_app()
+void AppMesoDiffusion::setup_app()
 {
   for (int i = 0; i < nlocal+nghost; i++) echeck[i] = pcheck[i] = 0;
 
@@ -284,7 +284,7 @@ void AppDiffusion::setup_app()
    compute energy of site
 ------------------------------------------------------------------------- */
 
-double AppDiffusion::site_energy(int i)
+double AppMesoDiffusion::site_energy(int i)
 {
   // energy only non-zero for OCCUPIED sites when energy included in model
 
@@ -314,7 +314,7 @@ double AppDiffusion::site_energy(int i)
    null bin extends to size maxneigh
 ------------------------------------------------------------------------- */
 
-void AppDiffusion::site_event_rejection(int i, RandomPark *random)
+void AppMesoDiffusion::site_event_rejection(int i, RandomPark *random)
 {
   double einitial,edelta;
 
@@ -380,7 +380,7 @@ void AppDiffusion::site_event_rejection(int i, RandomPark *random)
 /* ---------------------------------------------------------------------- */
 
 
-double AppDiffusion::site_propensity(int i)
+double AppMesoDiffusion::site_propensity(int i)
 {
   int j,ihop,nhop1,nhop2,eflag;
   double einitial,edelta,probone,proball;
@@ -473,7 +473,7 @@ double AppDiffusion::site_propensity(int i)
 ------------------------------------------------------------------------- */
 
 
-void AppDiffusion::site_event(int i, class RandomPark *random)
+void AppMesoDiffusion::site_event(int i, class RandomPark *random)
 {
   int j,m,isite;
 
@@ -562,7 +562,7 @@ void AppDiffusion::site_event(int i, class RandomPark *random)
    re-compute propensities out to 2nd neighbors of site I
 ------------------------------------------------------------------------- */
 
-int AppDiffusion::neighbor2(int i, int *sites)
+int AppMesoDiffusion::neighbor2(int i, int *sites)
 {
   int k,kk,m,mm,isite;
 
@@ -594,7 +594,7 @@ int AppDiffusion::neighbor2(int i, int *sites)
    re-compute propensities out to 3rd neighbors of site I
 ------------------------------------------------------------------------- */
 
-int AppDiffusion::neighbor3(int i, int *sites)
+int AppMesoDiffusion::neighbor3(int i, int *sites)
 {
   int k,kk,kkk,m,mm,mmm,isite;
 
@@ -635,7 +635,7 @@ int AppDiffusion::neighbor3(int i, int *sites)
    re-compute propensities out to 4th neighbors of site I
 ------------------------------------------------------------------------- */
 
-int AppDiffusion::neighbor4(int i, int *sites)
+int AppMesoDiffusion::neighbor4(int i, int *sites)
 {
   int k,kk,kkk,kkkk,m,mm,mmm,mmmm,isite;
 
@@ -683,7 +683,7 @@ int AppDiffusion::neighbor4(int i, int *sites)
 
 /* ---------------------------------------------------------------------- */
 
-int AppDiffusion::ncoord(int i)
+int AppMesoDiffusion::ncoord(int i)
 {
   int count = 0;
   for (int j = 0; j < numneigh[i]; j++)
@@ -696,7 +696,7 @@ int AppDiffusion::ncoord(int i)
    add cleared events to free list
 ------------------------------------------------------------------------- */
 
-void AppDiffusion::clear_events(int i)
+void AppMesoDiffusion::clear_events(int i)
 {
   int next;
   int index = firstevent[i];
@@ -715,7 +715,7 @@ void AppDiffusion::clear_events(int i)
    event = exchange with site J with probability = propensity
 ------------------------------------------------------------------------- */
 
-void AppDiffusion::add_event(int i, int destination, 
+void AppMesoDiffusion::add_event(int i, int destination, 
 			      double propensity, int eventflag)
 {
   // grow event list and setup free list
@@ -743,7 +743,7 @@ void AppDiffusion::add_event(int i, int destination,
    assume mark array is currently cleared, use it, clear it when done
 ------------------------------------------------------------------------- */
 
-int AppDiffusion::schwoebel_enumerate(int i, int *site)
+int AppMesoDiffusion::schwoebel_enumerate(int i, int *site)
 {
   int j,k,m,jneigh,kneigh,count;
 
@@ -808,7 +808,7 @@ int AppDiffusion::schwoebel_enumerate(int i, int *site)
    return -1 if could not find a suitable site
 ------------------------------------------------------------------------- */
 
-int AppDiffusion::find_deposition_site(RandomPark *random)
+int AppMesoDiffusion::find_deposition_site(RandomPark *random)
 {
   // pick a random position at top of box
 
@@ -861,7 +861,7 @@ int AppDiffusion::find_deposition_site(RandomPark *random)
      normal projection point of M
 ------------------------------------------------------------------------- */
 
-int AppDiffusion::exceed_limit(int m, double *start, double &dist2start)
+int AppMesoDiffusion::exceed_limit(int m, double *start, double &dist2start)
 {
   int increment,iprd,jprd;
 
@@ -911,7 +911,7 @@ int AppDiffusion::exceed_limit(int m, double *start, double &dist2start)
      normal projection point of M
 ------------------------------------------------------------------------- */
 
-double AppDiffusion::distsq_to_line(int m, double *start,
+double AppMesoDiffusion::distsq_to_line(int m, double *start,
 				    int iprd, int jprd, double &dist2start)
 {
   double delta[3],projection[3],offset[3];
@@ -936,7 +936,7 @@ double AppDiffusion::distsq_to_line(int m, double *start,
    so that nlocal,nghost,maxneigh are set
 ------------------------------------------------------------------------- */
 
-void AppDiffusion::allocate_data()
+void AppMesoDiffusion::allocate_data()
 {
   // for no_energy or linear:
   //   make esites large enough for 2 sites and their 1,2 neighbors
